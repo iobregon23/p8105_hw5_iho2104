@@ -1,0 +1,56 @@
+---
+title: "p8105_hw5_iho2104"
+author: "Ixtaccihuatl Obregon"
+date: "`r Sys.Date()`"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(purrr)
+library(ggplot2)
+```
+
+## Problem One
+
+```{r}
+
+```
+
+## Problem Two
+
+```{r}
+## CON
+# Get a vector of file paths
+
+file_paths_c = list.files("data", pattern = "con_\\d+\\.csv", full.names = TRUE)
+
+# Read each CSV file into a df
+
+controls = map_dfr(file_paths, read.csv) |> 
+  mutate(id = c("con_01", "con_02", "con_03", "con_04", "con_05", "con_06", "con_07", "con_08", "con_09", "con_10" )) |> 
+  select(id, everything()) 
+
+## EXP
+
+file_paths_e = list.files("data", pattern = "exp_\\d+\\.csv", full.names = TRUE)
+
+exp = map_dfr(file_paths, read.csv) |> 
+  mutate(id = c("exp_01", "exp_02", "exp_03", "exp_04", "exp_05", "exp_06", "exp_07", "exp_08", "exp_09", "exp_10" )) |> 
+  select(id, everything()) 
+
+# combined arms 
+
+df = rbind(controls, exp) |> 
+  separate(col = id, into = c("arm", "id"), sep = "_")
+
+# spaghetti plot 
+
+```
+
+## Problem Three
+
+```{r}
+
+```
