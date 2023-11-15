@@ -51,24 +51,230 @@ df_plot |>
 
 ## Problem Three
 
-```{r}
+Following chunk attempted to integrate a for loop and function to obtain 3500 observations consisting of variables: mu, iteration, estimate, and p.value. 
+
+```{r, eval= FALSE}
 fix_n = 30 
 fix_sigma = 5 
-mu = 0 
-
+mu_val= c(0,1,2,3,4,5,6)
 datasets = vector("list", length = 5000)
 
 for (i in 1:5000) {
-  dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
+  dataset = rnorm(fix_n, mean = mu_val, sd = fix_sigma) # Generate a dataset
+  t_test_results = lapply(mu_val, function(mu) {      # Function
+  t_test_result = t.test(dataset, mu = mu)            # Perform t-test
+  tidy_result = tidy(t_test_result)                   # Extract estimates and p-value 
+  tibble::tibble(estimate = tidy_result$estimate[1],  # Assuming one-sided t-test
+                   p_value = tidy_result$p.value[1])  # Assuming one-sided t-test
+})
+  
+datasets[[i]] = do.call(rbind, t_test_results) 
 }
 
-t_test_result = t.test(dataset, mu = 0)
-tidy_result = tidy(t_test_result)
-datasets[[i]] = list(estimate = tidy_result$estimate,
-                         p_value = tidy_result$p.value)
-
-# Convert results to a data frame
 results_df = do.call(rbind, datasets)
+results_df = mutate(results_df, estimate = sub("sub_str", "", estimate)) |> 
+select(estimate, p_value)
 head(results_df)
+```
+
+I used the for-loop 7 times to generate my dataframe with 35000 obs and 4 variables. 
+
+```{r}
+#mu_val = 0 
+fix_n = 30
+fix_sigma = 5
+mu = 0
+datasets <- vector("list", length = 5000)
+
+for (i in 1:5000) {
+  dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
+  t_test_result = t.test(dataset, mu = mu)
+  tidy_result = broom::tidy(t_test_result)
+  datasets[[i]] = tibble::tibble(
+    mu = mu, 
+    iteration = i, 
+    estimate = tidy_result$estimate[1],
+    p_value = tidy_result$p.value[1])
+}
+
+
+results_df_0 = do.call(rbind, datasets)
+
+
+results_df_0 = mutate(results_df_0, estimate = sub("sub_str", "", estimate))  # Remove sub_str from estimate
+results_df_0 = results_df_0 |> 
+  select(mu, iteration,estimate, p_value)
+
+head(results_df_0)
+```
+
+```{r}
+#mu_val = 1
+fix_n = 30
+fix_sigma = 5
+mu = 1
+datasets <- vector("list", length = 5000)
+
+for (i in 1:5000) {
+  dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
+  t_test_result = t.test(dataset, mu = mu)
+  tidy_result = broom::tidy(t_test_result)
+  datasets[[i]] = tibble::tibble(
+    mu = mu, 
+    iteration = i, 
+    estimate = tidy_result$estimate[1],
+    p_value = tidy_result$p.value[1])
+}
+
+results_df_1 = do.call(rbind, datasets)
+results_df_1 = mutate(results_df_1, estimate = sub("sub_str", "", estimate))
+results_df_1 = results_df_1 |> 
+  select(mu, iteration,estimate, p_value)
+
+head(results_df_1)
+```
+
+```{r}
+#mu_val = 2
+fix_n = 30
+fix_sigma = 5
+mu = 2
+datasets <- vector("list", length = 5000)
+
+for (i in 1:5000) {
+  dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
+  t_test_result = t.test(dataset, mu = mu)
+  tidy_result = broom::tidy(t_test_result)
+  datasets[[i]] = tibble::tibble(
+    mu = mu, 
+    iteration = i, 
+    estimate = tidy_result$estimate[1],
+    p_value = tidy_result$p.value[1])
+}
+
+results_df_2 = do.call(rbind, datasets)
+results_df_2 = mutate(results_df_2, estimate = sub("sub_str", "", estimate))
+results_df_2 = results_df_2 |> 
+  select(mu, iteration,estimate, p_value)
+
+head(results_df_2)
+```
+
+
+```{r}
+#mu_val = 3
+fix_n = 30
+fix_sigma = 5
+mu = 3
+datasets <- vector("list", length = 5000)
+
+for (i in 1:5000) {
+  dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
+  t_test_result = t.test(dataset, mu = mu)
+  tidy_result = broom::tidy(t_test_result)
+  datasets[[i]] = tibble::tibble(
+    mu = mu, 
+    iteration = i, 
+    estimate = tidy_result$estimate[1],
+    p_value = tidy_result$p.value[1])
+}
+
+results_df_3 = do.call(rbind, datasets)
+results_df_3 = mutate(results_df_3, estimate = sub("sub_str", "", estimate))
+results_df_3 = results_df_3 |> 
+  select(mu, iteration,estimate, p_value)
+
+head(results_df_3)
+```
+
+```{r}
+#mu_val = 4
+fix_n = 30
+fix_sigma = 5
+mu = 4
+datasets <- vector("list", length = 5000)
+
+for (i in 1:5000) {
+  dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
+  t_test_result = t.test(dataset, mu = mu)
+  tidy_result = broom::tidy(t_test_result)
+  datasets[[i]] = tibble::tibble(
+    mu = mu, 
+    iteration = i, 
+    estimate = tidy_result$estimate[1],
+    p_value = tidy_result$p.value[1])
+}
+
+results_df_4 = do.call(rbind, datasets)
+results_df_4 = mutate(results_df_4, estimate = sub("sub_str", "", estimate))
+results_df_4 = results_df_4 |> 
+  select(mu, iteration,estimate, p_value)
+
+head(results_df_4)
 
 ```
+
+```{r}
+#mu_val = 5
+fix_n = 30
+fix_sigma = 5
+mu = 5
+datasets <- vector("list", length = 5000)
+
+for (i in 1:5000) {
+  dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
+  t_test_result = t.test(dataset, mu = mu)
+  tidy_result = broom::tidy(t_test_result)
+  datasets[[i]] = tibble::tibble(
+    mu = mu, 
+    iteration = i, 
+    estimate = tidy_result$estimate[1],
+    p_value = tidy_result$p.value[1])
+}
+
+results_df_5 = do.call(rbind, datasets)
+results_df_5 = mutate(results_df_5, estimate = sub("sub_str", "", estimate))
+results_df_5 = results_df_5 |> 
+  select(mu, iteration,estimate, p_value)
+
+head(results_df_5)
+```
+
+```{r}
+#mu_val = 6
+fix_n = 30
+fix_sigma = 5
+mu = 6
+datasets <- vector("list", length = 5000)
+
+for (i in 1:5000) {
+  dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
+  t_test_result = t.test(dataset, mu = mu)
+  tidy_result = broom::tidy(t_test_result)
+  datasets[[i]] = tibble::tibble(
+    mu = mu, 
+    iteration = i, 
+    estimate = tidy_result$estimate[1],
+    p_value = tidy_result$p.value[1])
+}
+
+results_df_6 = do.call(rbind, datasets)
+results_df_6 = mutate(results_df_6, estimate = sub("sub_str", "", estimate))
+results_df_1 = results_df_6 |> 
+  select(mu, iteration,estimate, p_value)
+
+head(results_df_6)
+```
+```{r}
+combined_results = rbind(results_df_0, results_df_1, results_df_2, results_df_3, results_df_4, results_df_5, results_df_6)
+```
+
+
+Make a plot showing the proportion of times the null was rejected (the power of the test) on the y axis and the true value of μ on the x axis. Describe the association between effect size and power.
+
+```{r}
+
+```
+
+
+
