@@ -161,7 +161,7 @@ datasets <- vector("list", length = 5000)
 
 for (i in 1:5000) {
   dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
-  t_test_result = t.test(dataset, mu = mu)
+  t_test_result = t.test(dataset, mu = 0)
   tidy_result = broom::tidy(t_test_result)
   datasets[[i]] = tibble::tibble(
     mu = mu, 
@@ -190,8 +190,8 @@ datasets <- vector("list", length = 5000)
 
 for (i in 1:5000) {
   dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
-  t_test_result = t.test(dataset, mu = mu)
-  tidy_result = broom::tidy(t_test_result)
+  t_test_result = t.test(dataset, mu = 0)
+  tidy_result = tidy(t_test_result)
   datasets[[i]] = tibble::tibble(
     mu = mu, 
     iteration = i, 
@@ -199,12 +199,13 @@ for (i in 1:5000) {
     p_value = tidy_result$p.value[1])
 }
 
-results_df_1 = do.call(rbind, datasets)
-results_df_1 = mutate(results_df_1, estimate = sub("sub_str", "", estimate))
-results_df_1 = results_df_1 |> 
+results_df_1a = do.call(rbind, datasets)
+results_df_1a = mutate(results_df_1a, estimate = sub("sub_str", "", estimate), 
+                      estimate = as.numeric(estimate))
+results_df_1a = results_df_1a |> 
   select(mu, iteration,estimate, p_value)
 
-head(results_df_1)
+head(results_df_1a)
 ```
 
 ```{r}
@@ -216,7 +217,7 @@ datasets <- vector("list", length = 5000)
 
 for (i in 1:5000) {
   dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
-  t_test_result = t.test(dataset, mu = mu)
+  t_test_result = t.test(dataset, mu = 0)
   tidy_result = broom::tidy(t_test_result)
   datasets[[i]] = tibble::tibble(
     mu = mu, 
@@ -243,7 +244,7 @@ datasets <- vector("list", length = 5000)
 
 for (i in 1:5000) {
   dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
-  t_test_result = t.test(dataset, mu = mu)
+  t_test_result = t.test(dataset, mu = 0)
   tidy_result = broom::tidy(t_test_result)
   datasets[[i]] = tibble::tibble(
     mu = mu, 
@@ -269,7 +270,7 @@ datasets <- vector("list", length = 5000)
 
 for (i in 1:5000) {
   dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
-  t_test_result = t.test(dataset, mu = mu)
+  t_test_result = t.test(dataset, mu = 0)
   tidy_result = broom::tidy(t_test_result)
   datasets[[i]] = tibble::tibble(
     mu = mu, 
@@ -296,7 +297,7 @@ datasets <- vector("list", length = 5000)
 
 for (i in 1:5000) {
   dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
-  t_test_result = t.test(dataset, mu = mu)
+  t_test_result = t.test(dataset, mu = 0)
   tidy_result = broom::tidy(t_test_result)
   datasets[[i]] = tibble::tibble(
     mu = mu, 
@@ -322,7 +323,7 @@ datasets <- vector("list", length = 5000)
 
 for (i in 1:5000) {
   dataset = rnorm(fix_n, mean = mu, sd = fix_sigma)
-  t_test_result = t.test(dataset, mu = mu)
+  t_test_result = t.test(dataset, mu = 0)
   tidy_result = broom::tidy(t_test_result)
   datasets[[i]] = tibble::tibble(
     mu = mu, 
@@ -338,8 +339,10 @@ results_df_1 = results_df_6 |>
 
 head(results_df_6)
 ```
+
 ```{r}
-combined_results = rbind(results_df_0, results_df_1, results_df_2, results_df_3, results_df_4, results_df_5, results_df_6)
+combined_results = rbind(results_df_0, results_df_1a, results_df_2, results_df_3, results_df_4, results_df_5, results_df_6) |> 
+  mutate(estimate = as.numeric(estimate))
 ```
 
 
@@ -383,18 +386,18 @@ ggplot(average_estimates, aes(x = mu, y = avg_estimate)) +
 
 Make a second plot (or overlay on the first) the average estimate of μ^only in samples for which the null was rejected on the y axis and the true value of μ on the x axis. 
 
-```{r, eval = FALSE}
+```{r}
 rejected_estimates = 
   combined_results |> 
   mutate(reject = case_when(
   p_value > 0.05 ~ FALSE,
   p_value < 0.05 ~ TRUE
   )) |> 
-  group_by(mu) |>
   filter(reject == TRUE) |> 
-  summarise(mu = mean(mu)) 
+  group_by(mu) |>
+  summarize(muhat = mean(estimate))
 
-ggplot(rejected_estimates, aes(x = mu, y = rejected_estimates)) +
+ggplot(rejected_estimates, aes(x = mu, y = muhat)) +
   geom_line() +
   labs(title = "Rejected Estimates of μ hat vs. True Value of μ", x = "True Value of μ", y = "Rejected of μ") +
   theme_minimal()
@@ -402,6 +405,7 @@ ggplot(rejected_estimates, aes(x = mu, y = rejected_estimates)) +
 
 Is the sample average of μ^across tests for which the null is rejected approximately equal to the true value of μ
 ? Why or why not?
-
+When mu is 0, 1, 2, 3, the rejection of mu is higher. 
+When mu is 4, 5, 6, the rejection of mu follows the average estimates. 
 
 
