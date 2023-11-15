@@ -15,8 +15,79 @@ library(broom)
 
 ## Problem One
 
-```{r}
+Describe the raw data. 
 
+```{r}
+homicide =
+  read_csv("https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv")
+```
+
+There are 52179 observations and 12 variables that include: 'uid', 'report_date', 'victim_last'[name], 'victim_first' [name], 'victim_race', 'victim_age", 'victim_sex', 'city', 'state', 'lat', 'lon', and 'disposition'. Identification, victim names, and locations are given in the dataframe. 
+
+Create a 'city_state' variable and summarize within cities to obtain the total number of homicides and the number of unsolved homicides. 
+
+```{r}
+homicide_df = 
+  homicide |> 
+  mutate(city_state = paste(city, state, sep = ", "))
+
+disposition = 
+  homicide_df |> 
+  group_by(city_state) |> 
+  summarize(homicide_n = n(), 
+            unsolved_n = sum(disposition == "Closed without arrest" | disposition == "Open/No arrest"))
+
+head(disposition)
+
+
+```
+For the city of Baltimore, MD, use the 'prop.test' function to estimate the proportion of homicides that are unsolved; save the output of prop.test as an R object, apply the 'broom::tidy' to this object and pull the estimated proportion and confidence intervals from the resulting tidy dataframe.
+
+```{r}
+baltimore_md = 
+disposition |> 
+  filter(city_state == "Baltimore, MD")
+
+prop_test_result = prop.test(x = baltimore_md$unsolved_n, n = baltimore_md$homicide_n) |> 
+  tidy() |> 
+  select(estimate, conf.low, conf.high)
+
+
+baltimore_md
+```
+Now run prop.test for each of the cities in your dataset, and extract both the proportion of unsolved homicides and the confidence interval for each. Do this within a “tidy” pipeline, making use of purrr::map, purrr::map2, list columns and unnest as necessary to create a tidy dataframe with estimated proportions and CIs for each city.
+
+```{r}
+result_df <- disposition |> 
+  group_by(city_state) |> 
+  nest() |> 
+  mutate(
+    prop_test_result = map(data, ~prop.test(x = .x$unsolved_n, n = .x$homicide_n) |> 
+    tidy())) |> 
+  unnest(prop_test_result) |> 
+  select(city_state, estimate, conf.low, conf.high)
+
+
+result_df
+```
+Create a plot that shows the estimates and CIs for each city – check out geom_errorbar for a way to add error bars based on the upper and lower limits. Organize cities according to the proportion of unsolved homicides.
+
+```{r}
+result_df = 
+  result_df |> 
+  arrange(estimate)  
+
+ggplot(result_df, aes(x = reorder(city_state, estimate), y = estimate)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
+  labs(
+    title = "Proportion of Unsolved Homicides for Each City",
+    x = "City",
+    y = "Estimated Proportion",
+    caption = "Error bars represent confidence intervals"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 ```
 
 ## Problem Two
@@ -48,6 +119,8 @@ df_plot |>
   geom_line() +
   labs(title = "Spaghetti Plot", x = "Time", y = "Value")
 ```
+
+The plot shows the experiment arm to have higher values compared to the control arm. During week 3 through week 8, the experimental arm shows a noticeable set of higher values compared to the control arm. 
 
 ## Problem Three
 
@@ -273,8 +346,62 @@ combined_results = rbind(results_df_0, results_df_1, results_df_2, results_df_3,
 Make a plot showing the proportion of times the null was rejected (the power of the test) on the y axis and the true value of μ on the x axis. Describe the association between effect size and power.
 
 ```{r}
+combined_results_power = 
+  combined_results |> 
+   mutate(reject = case_when(
+    p_value > 0.05 ~ FALSE,
+    p_value < 0.05 ~ TRUE
+  )) |> 
+  group_by(mu) |> 
+  summarise(count = sum(reject)) |> 
+  mutate(proportion = count / 5000)
+
+combined_results_power |> 
+  ggplot(aes(x = mu, y = proportion, fill = mu)) +
+  geom_col() +
+  labs(title = "Proportiobn of Rejected Hypotheses per mu",
+       x = "True Value of mu", y = "Proportion Rejected")
+```
+As the true mu increase, the proportion rejection increases. 
+
+
+Make a plot showing the average estimate of μ^ on the y axis and the true value of μ on the x axis. 
+
+```{r}
+average_estimates = combined_results |> 
+  group_by(mu) |> 
+  summarize(avg_estimate = mean(estimate))
+
+average_estimates = average_estimates[order(average_estimates$mu), ]
+
+ggplot(average_estimates, aes(x = mu, y = avg_estimate)) +
+  geom_line() +
+  labs(title = "Average Estimate of μ hat vs. True Value of μ", x = "True Value of μ", y = "Average Estimate of μ") +
+  theme_minimal()
 
 ```
+
+Make a second plot (or overlay on the first) the average estimate of μ^only in samples for which the null was rejected on the y axis and the true value of μ on the x axis. 
+
+```{r, eval = FALSE}
+rejected_estimates = 
+  combined_results |> 
+  mutate(reject = case_when(
+  p_value > 0.05 ~ FALSE,
+  p_value < 0.05 ~ TRUE
+  )) |> 
+  group_by(mu) |>
+  filter(reject == TRUE) |> 
+  summarise(mu = mean(mu)) 
+
+ggplot(rejected_estimates, aes(x = mu, y = rejected_estimates)) +
+  geom_line() +
+  labs(title = "Rejected Estimates of μ hat vs. True Value of μ", x = "True Value of μ", y = "Rejected of μ") +
+  theme_minimal()
+```
+
+Is the sample average of μ^across tests for which the null is rejected approximately equal to the true value of μ
+? Why or why not?
 
 
 
