@@ -58,7 +58,7 @@ baltimore_md
 Now run prop.test for each of the cities in your dataset, and extract both the proportion of unsolved homicides and the confidence interval for each. Do this within a “tidy” pipeline, making use of purrr::map, purrr::map2, list columns and unnest as necessary to create a tidy dataframe with estimated proportions and CIs for each city.
 
 ```{r}
-result_df <- disposition |> 
+result_df = disposition |> 
   group_by(city_state) |> 
   nest() |> 
   mutate(
@@ -365,7 +365,8 @@ combined_results_power |>
   labs(title = "Proportiobn of Rejected Hypotheses per mu",
        x = "True Value of mu", y = "Proportion Rejected")
 ```
-As the true mu increase, the proportion rejection increases. 
+
+As the true mu increase, the proportion rejection increases, showing effect size impacts power (in this case increases). 
 
 
 Make a plot showing the average estimate of μ^ on the y axis and the true value of μ on the x axis. 
@@ -405,7 +406,6 @@ ggplot(rejected_estimates, aes(x = mu, y = muhat)) +
 
 Is the sample average of μ^across tests for which the null is rejected approximately equal to the true value of μ
 ? Why or why not?
-When mu is 0, 1, 2, 3, the rejection of mu is higher. 
-When mu is 4, 5, 6, the rejection of mu follows the average estimates. 
+When mu is 0, 1, 2, 3, the rejection of mu is higher. When mu is 4, 5, 6, the rejection of mu follows the average estimates. When the true value is higher then the mu of the samples is different compared to 0. 
 
 
